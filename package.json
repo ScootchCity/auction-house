@@ -1,0 +1,17 @@
+{
+  "name": "auction-house",
+  "version": "1.0.0",
+  "description": "Backend for auction house class project",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "dependencies": {
+    "pg": "^8.12.0",
+    "ioredis": "^5.3.2",
+    "mongoose": "^8.4.0",
+    "kafkajs": "^2.2.4"
+  }
+}
