@@ -27,9 +27,15 @@ async function verify_unique_email(email) {
 }
 
 // Once everything has been verified, this function will write all of the account info to the db.
-function write_login() {
-
+async function write_login(email, username, password) {
+  const result = await client.query (
+  '    INSERT INTO accounts (email, username, password) VALUES $1, $2, $3',
+      [email, username, password]
+  )
+  return result.rowCount > 0
 }
 
 //put functions here so they can be used when the postgres index is imported
 export {verify_login}
+export {verify_unique_email}
+export {write_login}
