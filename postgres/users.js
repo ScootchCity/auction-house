@@ -27,6 +27,8 @@ async function verify_unique_email(email) {
 }
 
 // Once everything has been verified, this function will write all of the account info to the db.
+// This one still returns a bool like the others, but here it's just to check if the write was successful
+// rather than being a key to its use
 async function write_login(email, username, password) {
   const result = await client.query (
   '    INSERT INTO accounts (email, username, password) VALUES $1, $2, $3',
