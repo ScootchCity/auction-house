@@ -3,11 +3,12 @@
 
 -- Table Creation
 -- Accounts: contains all user accounts
+-- TODO: HASH AND DE-HASH PASSWORDS (REMEMBER TO ADD SUFFIX TO MAKE HAS HARDER TO DECODE)
 CREATE TABLE IF NOT EXISTS accounts (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     email VARCHAR(255) NOT NULL UNIQUE,
     username VARCHAR(25) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL, --replace with pw_hash
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
     --TODO: give some sort of constraint to password for added security?
 );
