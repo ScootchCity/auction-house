@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="DataSourcePerFileMappings">
-    <file url="file://$PROJECT_DIR$/auction_house.sql" value="f6b609b7-c227-45a5-a136-16f909864783" />
-    <file url="file://$PROJECT_DIR$/postgres_seed_data.sql" value="f6b609b7-c227-45a5-a136-16f909864783" />
-  </component>
-</project>

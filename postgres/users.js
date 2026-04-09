@@ -2,7 +2,7 @@
 import client from './client.js'
 
 
-//TODO: figure out node OR learn Drizzle for handling db here
+//TODO: look into drizzle or figure out other way to ensure query security with functions
 
 // verify_login: queries db to check for any accounts with the matching name-pw combo.
 // Should return true if found, false if not.
@@ -36,6 +36,8 @@ async function write_login(email, username, password) {
   )
   return result.rowCount > 0
 }
+
+//todo: Make function for getting UUID of currently logged-in user
 
 //put functions here so they can be used when the postgres index is imported
 export {verify_login}
