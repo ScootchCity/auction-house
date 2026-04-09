@@ -14,7 +14,6 @@ CREATE TABLE IF NOT EXISTS accounts (
 );
 
 -- Auctions: contains all auctions, finished or in progress
---TODO: add something to make auctions distinguishable without its item
 CREATE TABLE IF NOT EXISTS auctions (
     id BIGSERIAL PRIMARY KEY,
     seller UUID NOT NULL REFERENCES accounts(id),

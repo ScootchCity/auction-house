@@ -8,9 +8,9 @@ const { Pool } = pg
 const client = new Pool({
   host: 'localhost',
   port: 5432,
-  user: process.env.POSTGRES_USER,
-  password: process.env.POSTGRES_PASSWORD,
-  database: process.env.POSTGRES_DB,
+  user: "admin", //process.env.POSTGRES_USER,
+  password: "admin", //process.env.POSTGRES_PASSWORD,
+  database: "auction_house",
 })
 
 export default client
