@@ -11,14 +11,28 @@ VALUES
 --Auctions in progress (Will later add a few past auctions with manually-entered dates)
 INSERT INTO auctions (seller, item_name, description, status)
 VALUES
-    ((SELECT id FROM accounts WHERE email = 'calvin.dibartolo@mymail.champlain.edu'), '2015 Honda Civic', 'Good condition, mostly spare parts', 'In-Progress'),
+    --((SELECT id FROM accounts WHERE email = 'calvin.dibartolo@mymail.champlain.edu'), '2015 Honda Civic', 'Good condition, mostly spare parts', 'In-Progress'),
     ((SELECT id FROM accounts WHERE email = 'ashish.subedi@mymail.champlain.edu'), 'House of the Dead Original Arcade Machine', 'Heavily used, one light-gun broken', 'In-Progress'),
     ((SELECT id FROM accounts WHERE email = 'lloyd.ivester@mymail.champlain.edu'), 'Orange Game Cube', NULL, 'In-Progress');
 
 --Completed Auctions 
-INSERT INTO auctions (seller, item_name, description, status, created_at)
+INSERT INTO auctions (seller, item_name, description, status, start_date)
 VALUES
     ((SELECT id FROM accounts WHERE email = 'logan.donaghue@mymail.champlain.edu'), '2012 Chevy Silverado', 'Good condition, 120k miles, swapped engine at 75k miles', 'Finished', NOW() - INTERVAL '7 days');
+
+SELECT item_name, end_date FROM auctions WHERE status = 'In-Progress';
+
+SELECT item_name, end_date, description FROM auctions WHERE item_name = 'House of the Dead Original Arcade Machine';
+
+INSERT INTO bids (auction_id, account_id, amount, top_bid)
+VALUES
+    ((SELECT id FROM auctions WHERE item_name = 'House of the Dead Original Arcade Machine' LIMIT 1), (SELECT id FROM accounts WHERE email = 'calvin.dibartolo@mymail.champlain.edu' LIMIT 1), 9700.00, TRUE);
+
+SELECT
+    amount
+FROM bids b
+JOIN auctions a ON a.id = b.auction_id
+WHERE a.item_name = 'House of the Dead Original Arcade Machine' AND b.top_bid = true;
 
 -- INSERT INTO bids (auction_id, account_id, amount, top_bid)
 -- VALUES
