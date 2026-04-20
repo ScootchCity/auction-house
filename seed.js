@@ -1,19 +1,12 @@
 import client from './postgres/client.js'
-import hash_salt from './postgres/client.js'
-
-// Seed passwords:
-// Password123
-// Password456
-// Password789
-// Password0!?
 
 await client.query(`
   INSERT INTO accounts (email, username, password)
   VALUES
-    ('calvin.dibartolo@mymail.champlain.edu', 'cdibartolo05', 'b6e28cdced87d18b3cfd35534251e6bf77234848e70c3fc622a1b0a0b5cacac9'),
-    ('ashish.subedi@mymail.champlain.edu', 'asheesh8', '6217f6c0fc314ead884a6bdba65a776c0aae5f8d8efd6f19bbf1eaa709189cfa'),
-    ('lloyd.ivester@mymail.champlain.edu', 'ScootchCity', 'b365de03fb81795573e4f9de60e53af894df858ba44c82cb4a302d9ec2beb5b9'),
-    ('logan.donaghue@mymail.champlain.edu', 'Loganest2110', '768b3083b45077cb63e0ef68cf91e4d03ae85f8f1eb89290bbfc376d168e814e')
+    ('calvin.dibartolo@mymail.champlain.edu', 'cdibartolo05', 'Password123'),
+    ('ashish.subedi@mymail.champlain.edu', 'asheesh8', 'Password456'),
+    ('lloyd.ivester@mymail.champlain.edu', 'ScootchCity', 'Password789'),
+    ('logan.donaghue@mymail.champlain.edu', 'Loganest2110', 'Password0!?')
   ON CONFLICT DO NOTHING
 `)
 
