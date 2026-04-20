@@ -26,7 +26,7 @@ async function write_auction(seller, item, desc) {
         [seller, item, desc]
     );
     const id = result.rows[0].id;
-    const bid_result = write_starting_bid(id, seller);
+    const bid_result = await write_starting_bid(id, seller);
     return result.rowCount > 0
 }
 
