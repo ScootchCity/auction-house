@@ -20,7 +20,7 @@ Items that need to be implemented or fixed by the DB owners before the web GUI i
 - [x] `set_top_bid()` — fixed return value, now references correct result variable
 - [x] `write_bid()` — now returns new bid `id` via `RETURNING id` so `set_top_bid` can be called with it
 - [x] Both functions now called from `kafka/bidProcessor.js` — Postgres `top_bid` flag kept in sync
-
+- [ ] Some of the seed auctions still need a baseline bid so changing the top bid can work correctly
 ---
 
 ## MongoDB
