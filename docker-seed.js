@@ -15,7 +15,7 @@ await pgClient.query(`
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     email VARCHAR(255) NOT NULL UNIQUE,
     username VARCHAR(25) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
+    pw_hash VARCHAR(260) NOT NULL,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
   )
 `)
@@ -50,10 +50,10 @@ console.log('[seed] postgres schema ready')
 await pgClient.query(`
   INSERT INTO accounts (email, username, password)
   VALUES
-    ('calvin.dibartolo@mymail.champlain.edu', 'cdibartolo05', 'Password123'),
-    ('ashish.subedi@mymail.champlain.edu',    'asheesh8',     'Password456'),
-    ('lloyd.ivester@mymail.champlain.edu',    'ScootchCity',  'Password789'),
-    ('logan.donaghue@mymail.champlain.edu',   'Loganest2110', 'Password0!?')
+    ('calvin.dibartolo@mymail.champlain.edu', 'cdibartolo05', 'b6e28cdced87d18b3cfd35534251e6bf77234848e70c3fc622a1b0a0b5cacac9'),
+    ('ashish.subedi@mymail.champlain.edu',    'asheesh8',     '6217f6c0fc314ead884a6bdba65a776c0aae5f8d8efd6f19bbf1eaa709189cfa'),
+    ('lloyd.ivester@mymail.champlain.edu',    'ScootchCity',  'b365de03fb81795573e4f9de60e53af894df858ba44c82cb4a302d9ec2beb5b9'),
+    ('logan.donaghue@mymail.champlain.edu',   'Loganest2110', '768b3083b45077cb63e0ef68cf91e4d03ae85f8f1eb89290bbfc376d168e814e')
   ON CONFLICT DO NOTHING
 `)
 
