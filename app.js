@@ -5,6 +5,8 @@ import { RedisStore } from 'connect-redis'
 import 'dotenv/config'
 
 import { run as runBidProcessor } from './kafka/bidProcessor.js'
+import { get_active_auction_schedules } from './postgres/auctions.js'
+import { scheduleExpiry } from './scheduler.js'
 import authRoutes from './routes/auth.js'
 import auctionRoutes from './routes/auctions.js'
 
@@ -33,6 +35,10 @@ app.use(session({
 }))
 
 await runBidProcessor()
+
+const activeAuctions = await get_active_auction_schedules()
+for (const a of activeAuctions) scheduleExpiry(a.id, a.end_date)
+console.log(`[scheduler] ${activeAuctions.length} auction(s) scheduled for expiry`)
 
 app.use('/', authRoutes)
 app.use('/', auctionRoutes)

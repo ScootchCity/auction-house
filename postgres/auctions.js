@@ -35,4 +35,18 @@ async function write_auction(seller, item, desc) {
 // console.log(auctions);
 //TODO: functions for updating auction state and other administrative tasks
 
-export { get_active_auctions, get_auction_details, write_auction }
+async function finish_auction(id) {
+    await client.query(
+        "UPDATE auctions SET status = 'Finished' WHERE id = $1",
+        [id]
+    )
+}
+
+async function get_active_auction_schedules() {
+    const result = await client.query(
+        "SELECT id, end_date FROM auctions WHERE status = 'In-Progress'"
+    )
+    return result.rows
+}
+
+export { get_active_auctions, get_auction_details, write_auction, finish_auction, get_active_auction_schedules }

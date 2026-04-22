@@ -36,4 +36,16 @@ async function write_starting_bid(auction_id, account_id) {
 //get_top_bid("House of the Dead Original Arcade Machine");
 //set_top_bid(4);
 
-export { get_top_bid, set_top_bid, write_bid, write_starting_bid };
+async function get_user_bids(account_id) {
+    const result = await client.query(
+        `SELECT b.amount, b.top_bid, a.id AS auction_id, a.item_name, a.status
+         FROM bids b
+         JOIN auctions a ON a.id = b.auction_id
+         WHERE b.account_id = $1
+         ORDER BY b.created_at DESC`,
+        [account_id]
+    );
+    return result.rows;
+}
+
+export { get_top_bid, set_top_bid, write_bid, write_starting_bid, get_user_bids };

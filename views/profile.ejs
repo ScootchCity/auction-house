@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Profile — Auction House</title>
+    <style>
+        body { font-family: sans-serif; max-width: 700px; margin: 40px auto; padding: 0 1rem; }
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+        h1 { margin: 0; }
+        .logout { background: none; border: 1px solid #333; padding: .4rem .8rem; cursor: pointer; }
+        .back { display: inline-block; margin-bottom: 1.5rem; color: #555; text-decoration: none; }
+        .back:hover { text-decoration: underline; }
+        h2 { border-bottom: 1px solid #ddd; padding-bottom: .5rem; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 2rem; }
+        th { text-align: left; padding: .5rem; border-bottom: 2px solid #ddd; color: #555; font-size: .85rem; text-transform: uppercase; }
+        td { padding: .6rem .5rem; border-bottom: 1px solid #eee; }
+        td a { color: #333; text-decoration: none; }
+        td a:hover { text-decoration: underline; }
+        .empty { color: #999; margin-bottom: 2rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1><%= user.username %>'s Profile</h1>
+        <form method="POST" action="/logout">
+            <button class="logout" type="submit">Log out</button>
+        </form>
+    </header>
+
+    <a class="back" href="/auctions">&larr; Back to auctions</a>
+
+    <h2>Auctions You're Winning</h2>
+    <% if (active_bids.length === 0) { %>
+        <p class="empty">You're not the top bidder on any active auctions.</p>
+    <% } else { %>
+        <table>
+            <tr><th>Item</th><th>Your Bid</th></tr>
+            <% active_bids.forEach(b => { %>
+            <tr>
+                <td><a href="/auctions/<%= b.auction_id %>"><%= b.item_name %></a></td>
+                <td>$<%= b.amount.toFixed(2) %></td>
+            </tr>
+            <% }) %>
+        </table>
+    <% } %>
+
+    <h2>Auctions Won</h2>
+    <% if (won.length === 0) { %>
+        <p class="empty">You haven't won any auctions yet.</p>
+    <% } else { %>
+        <table>
+            <tr><th>Item</th><th>Winning Bid</th></tr>
+            <% won.forEach(b => { %>
+            <tr>
+                <td><%= b.item_name %></td>
+                <td>$<%= b.amount.toFixed(2) %></td>
+            </tr>
+            <% }) %>
+        </table>
+    <% } %>
+</body>
+</html>
