@@ -4,6 +4,7 @@ import { get_auction } from '../mongo/auction.js'
 import { getActiveAuctions } from '../redis/auction.js'
 import { getTopBid } from '../redis/auction.js'
 import { submitBid } from '../kafka/producer.js'
+import { get_user_bids } from '../postgres/bids.js'
 
 const router = Router()
 
@@ -27,6 +28,14 @@ router.get('/auctions/:id', requireAuth, async (req, res) => {
 
     const top_bid = await getTopBid(auction.auction_id)
     res.render('auction', { auction: auction.toObject(), top_bid, user: req.session.user, error: req.query.error || null })
+})
+
+// User profile — current top bids and won auctions
+router.get('/profile', requireAuth, async (req, res) => {
+    const bids = await get_user_bids(req.session.user.id)
+    const active_bids = bids.filter(b => b.status === 'In-Progress' && b.top_bid)
+    const won = bids.filter(b => b.status === 'Finished' && b.top_bid)
+    res.render('profile', { user: req.session.user, active_bids, won })
 })
 
 // Place a bid

@@ -19,9 +19,12 @@
 <body>
     <header>
         <h1>Active Auctions</h1>
-        <form method="POST" action="/logout">
-            <button class="logout" type="submit">Log out (<%= user.username %>)</button>
-        </form>
+        <div style="display:flex; gap:.75rem; align-items:center;">
+            <a href="/profile" style="color:#333; text-decoration:none; font-size:.95rem;"><%= user.username %></a>
+            <form method="POST" action="/logout">
+                <button class="logout" type="submit">Log out</button>
+            </form>
+        </div>
     </header>
 
     <% if (auctions.length === 0) { %>

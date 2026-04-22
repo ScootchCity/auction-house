@@ -3,6 +3,7 @@ import client from './client.js'
 import { createHash } from 'node:crypto';
 
 
+// single shared salt — consider bcrypt for per-user salts in production
 function hash_salt(password) {
   password += 'diamond'; // appends hash phrase, change as needed
   return createHash('sha256').update(password).digest('hex');
@@ -18,7 +19,7 @@ async function verify_login(identifier, password) {
   const result = await client.query(
     `SELECT id, username FROM accounts
      WHERE (email = $1 OR username = $1) AND password = $2`,
-    [identifier, password]
+    [identifier, hash_salt(password)]
   )
   return result.rows[0] ?? null
 }
@@ -38,7 +39,7 @@ async function verify_unique_email(email) {
 async function write_login(email, username, password) {
   const result = await client.query (
   'INSERT INTO accounts (email, username, password) VALUES ($1, $2, $3)',
-      [email, username, password]
+      [email, username, hash_salt(password)]
   )
   return result.rowCount > 0
 }
