@@ -45,6 +45,17 @@ async function write_login(email, username, password) {
 }
 
 //todo: Make function for getting UUID of currently logged-in user
+//is this a violation of data security? how bad is it if someone gets ahold of a UUID?
+async function get_UUID(email){
+  const result = await client.query (
+      'SELECT id FROM accounts WHERE email = $1',
+      [email]
+  )
+  return result.rows;
+}
+
+let id = await get_UUID("calvin.dibartolo@mymail.champlain.edu");
+console.log(id);
 
 //put functions here so they can be used when the postgres index is imported
 export {verify_login}

@@ -10,11 +10,10 @@ Items that need to be implemented or fixed by the DB owners before the web GUI i
 - [x] `verify_login()` — now returns full user row `{ id, username }` or null.
 
 **`postgres/auctions.js`**
-- [ ] `write_auction(seller, item, desc)` — the `seller` parameter needs to accept a UUID from the `accounts` table. Currently has a TODO about how to get the account UUID securely.
+- [X] `write_auction(seller, item, desc)` — the `seller` parameter needs to accept a UUID from the `accounts` table. Currently has a TODO about how to get the account UUID securely.
 - [x] `write_auction()` does not `await` the call to `write_starting_bid()` on line 29 — this is a bug that will cause the starting bid to silently fail.
-- [ ] Add a function to mark an auction as finished (update `status` to `'Finished'`). Needed for auction lifecycle management.
+- [x] Add a function to mark an auction as finished (update `status` to `'Finished'`). Needed for auction lifecycle management.
 - [x] `get_active_auctions()` is commented out and never called — either finish or remove it.
-- [ ] add character limit to `auctions.description`
 
 **`postgres/bids.js`**
 - [x] `get_top_bid()` — fixed return value to `result.rows[0]?.amount`
