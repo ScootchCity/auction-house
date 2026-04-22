@@ -54,10 +54,11 @@ async function get_UUID(email){
   return result.rows;
 }
 
-let id = await get_UUID("calvin.dibartolo@mymail.champlain.edu");
-console.log(id);
+//let id = await get_UUID("calvin.dibartolo@mymail.champlain.edu");
+//console.log(id);
 
 //put functions here so they can be used when the postgres index is imported
 export {verify_login}
 export {verify_unique_email}
 export {write_login}
+export {get_UUID}

@@ -1,116 +1,122 @@
-# Auction House — Backend Setup
+# Auction House
 
-## Prerequisites
-
-Each team member needs these installed:
-
-| Tool | Download |
-|------|----------|
-| [Docker Desktop](https://www.docker.com/products/docker-desktop/) | Runs all the databases |
-| [Node.js LTS](https://nodejs.org/) | Runs your JavaScript code |
+An auction web app built with Node.js, Express, PostgreSQL, MongoDB, Redis, and Kafka.
 
 ---
 
-## First-time setup
+## Prerequisites
+
+| Tool | Purpose |
+|------|---------|
+| [Docker Desktop](https://www.docker.com/products/docker-desktop/) | Runs the entire app and all services |
+
+---
+
+## Setup
 
 1. **Clone the repo** and open a terminal in the project folder.
 
-2. **Install JS dependencies:**
+2. **Start everything:**
    ```bash
-   npm install
+   docker compose up --build -d
    ```
+   First run will download images and build the app container.
 
-4. **Start all databases:**
-   ```bash
-   docker compose up -d
-   ```
-   The `-d` flag runs them in the background. First run will download the images (~a few minutes).
+3. **Open the app:** [http://localhost:3000](http://localhost:3000)
 
-5. **Verify everything is running:**
-   ```bash
-   docker compose ps
-   ```
-   All services should show `running`.
+---
+
+## Making changes
+
+- **EJS templates** (`views/`) — changes are reflected immediately on page refresh, no restart needed.
+- **JS files** (routes, postgres, kafka, etc.) — restart the app container to pick up changes:
+  ```bash
+  docker compose restart app
+  ```
+- **Adding npm packages** — requires a full rebuild:
+  ```bash
+  docker compose up --build app
+  ```
+
+---
+
+## Architecture
+
+The app is split across several services that each handle a specific concern:
+
+| Service | Role |
+|---------|------|
+| **App** | Express web server — serves pages, handles sessions, routes requests |
+| **PostgreSQL** | Source of truth for users, auctions, and bids |
+| **MongoDB** | Document store for auction data — will become the primary auction source once it is complete |
+| **Redis** | Caches active auctions and top bids for fast reads; stores sessions |
+| **Kafka** | Message queue for bid processing — bids are validated, queued, then written to Postgres and Redis asynchronously |
+| **Seeder** | Runs once at startup to create tables and insert seed data, then exits. An exited seeder container is normal and expected. |
+
+### Bid flow
+1. User submits a bid → validated against Redis cache → sent to Kafka
+2. Kafka consumer (`bidProcessor.js`) picks it up → writes to Postgres → updates Redis
+3. Auction page polls `/auctions/:id/top_bid` every 5 seconds and updates without a page reload
+
+### Auction expiry
+When the app starts, it schedules a `setTimeout` for every active auction based on its `end_date`. When the timer fires, the auction is marked `Finished` in Postgres and removed from the Redis cache.
 
 ---
 
 ## Services & ports
 
-| Service | Port | Purpose |
-|---------|------|---------|
-| PostgreSQL | `5432` | Relational database |
-| MongoDB | `27017` | Document database |
-| Redis | `6379` | In-memory key/value store |
-| Kafka | `9092` | Message broker |
+| Service | URL | Purpose |
+|---------|-----|---------|
+| **App** | http://localhost:3000 | Web GUI |
+| pgAdmin | http://localhost:5050 | Postgres UI |
+| Adminer | http://localhost:8084 | Postgres UI (lightweight) |
+| Mongo Express | http://localhost:8082 | MongoDB UI |
+| Redis Commander | http://localhost:8081 | Redis UI |
+| Kafka UI | http://localhost:8083 | Kafka UI |
 
-## UI Dashboards (open in browser)
-
-| Dashboard | URL | Login |
-|-----------|-----|-------|
-| pgAdmin (Postgres) | http://localhost:5050 | `admin@admin.com` / `admin` |
-| Adminer (Postgres) | http://localhost:8084 | System: `PostgreSQL`, Server: `postgres`, Username/Password/Database: from `.env` |
-| Mongo Express | http://localhost:8082 | none |
-| Redis Commander | http://localhost:8081 | none |
-| Kafka UI | http://localhost:8083 | none |
-
-> **pgAdmin first login:** After signing in, you need to add a server manually.
+> **pgAdmin first login:** After signing in, add a server manually.
 > Right-click Servers → Register → Server.
-> - Name: `auction-house`
-> - Host: `postgres`  (not localhost — Docker uses the service name)
+> - Name: anything
+> - Host: `postgres` (not localhost — Docker uses the service name)
 > - Port: `5432`
-> - Username: `admin`
-> - Password: `admin`
+> - Username/Password/Database: from `.env`
 
 ---
 
 ## Docker commands
 
 ```bash
-# Start databases (do this before running your code)
+# Start everything (first time or after adding packages)
+docker compose up --build -d
+
+# Start without rebuilding
 docker compose up -d
 
-# Check services are running
+# Restart just the app (after changing JS files)
+docker compose restart app
+
+# Check service status
 docker compose ps
 
-# Stop databases (just pausing them basically)
-docker compose stop
+# View logs for a service
+docker compose logs app
+docker compose logs kafka
 
-# Full stop + remove containers (data still saved in volumes)
+# Stop everything (data is preserved)
 docker compose down
 
-# Wipe ALL data and start fresh
+# Wipe ALL data and start fresh (re-runs seeder on next up)
 docker compose down -v
 ```
 
 ---
 
-## The .env file
+## .env
 
-The `.env` file in the root of the project stores credentials (database usernames, passwords, etc.). Instead of hardcoding these values directly in your code, you read them via `process.env.VARIABLE_NAME`. The `dotenv` library loads the `.env` file automatically when your code runs.
-
-At the top of your `client.js`, add:
-```js
-import dotenv from 'dotenv'
-dotenv.config()
-```
-
-Then you can use any variable from `.env` like:
-```js
-process.env.POSTGRES_USER      // 'admin'
-process.env.POSTGRES_PASSWORD  // 'admin'
-```
-
-This means all credentials are defined in one place — if something changes, you update `.env` and nothing else.
+Credentials are stored in `.env` at the project root. These are default/dev values — nothing sensitive.
 
 ---
 
-## Documentation
+## Further reading
 
-See [docs.md](docs.md) for links to each database client library's documentation.
-
----
-
-## Troubleshooting
-
-- **Docker not starting** — make sure Docker Desktop is open and running before running `docker compose` commands.
-- **Containers keep restarting** — run `docker compose logs <service-name>` to see the error (e.g. `docker compose logs kafka`).
+See [docs.md](docs.md) for links to each library's documentation.

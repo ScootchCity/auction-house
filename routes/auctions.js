@@ -38,6 +38,12 @@ router.get('/profile', requireAuth, async (req, res) => {
     res.render('profile', { user: req.session.user, active_bids, won })
 })
 
+// Top bid polling endpoint — returns current top bid as JSON for client-side updates
+router.get('/auctions/:id/top_bid', requireAuth, async (req, res) => {
+    const top_bid = await getTopBid(parseInt(req.params.id))
+    res.json({ top_bid })
+})
+
 // Place a bid
 router.post('/bid', requireAuth, async (req, res) => {
     const { auction_id, amount } = req.body
@@ -53,7 +59,7 @@ router.post('/bid', requireAuth, async (req, res) => {
         return res.redirect(`/auctions/${auction_id}?error=${encodeURIComponent(result.reason)}`)
     }
 
-    res.redirect(`/auctions/${auction_id}`)
+    res.redirect(`/auctions/${auction_id}?just_bid=1`)
 })
 
 export default router
