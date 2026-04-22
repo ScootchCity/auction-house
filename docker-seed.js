@@ -48,7 +48,7 @@ console.log('[seed] postgres schema ready')
 // ── 2. Postgres: seed accounts + auctions ────────────────────────────────────
 
 await pgClient.query(`
-  INSERT INTO accounts (email, username, password)
+  INSERT INTO accounts (email, username, pw_hash)
   VALUES
     ('calvin.dibartolo@mymail.champlain.edu', 'cdibartolo05', 'b6e28cdced87d18b3cfd35534251e6bf77234848e70c3fc622a1b0a0b5cacac9'),
     ('ashish.subedi@mymail.champlain.edu',    'asheesh8',     '6217f6c0fc314ead884a6bdba65a776c0aae5f8d8efd6f19bbf1eaa709189cfa'),
