@@ -48,4 +48,15 @@ async function get_user_bids(account_id) {
     return result.rows;
 }
 
-export { get_top_bid, set_top_bid, write_bid, write_starting_bid, get_user_bids };
+// check if a user has placed at least one bid on an auction
+async function has_bid(auction_id, account_id) {
+  const result = await client.query(
+    'SELECT 1 FROM bids WHERE auction_id = $1 AND account_id = $2 LIMIT 1',
+    [auction_id, account_id]
+  )
+  return result.rowCount > 0
+}
+
+
+
+export { get_top_bid, set_top_bid, write_bid, write_starting_bid, get_user_bids, has_bid };

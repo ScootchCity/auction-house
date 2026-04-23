@@ -2,7 +2,7 @@ import { Router } from 'express'
 import { get_auction, create_auction } from '../mongo/auction.js'
 import { getActiveAuctions, setAuction, getAuction, getTopBid, pushChatMessage, getChatMessages, deleteAuction } from '../redis/auction.js'
 import { submitBid } from '../kafka/producer.js'
-import { get_user_bids } from '../postgres/bids.js'
+import { get_user_bids, has_bid } from '../postgres/bids.js'
 import { write_auction, finish_auction } from '../postgres/auctions.js'
 import { get_username_by_id } from '../postgres/users.js'
 import { scheduleExpiry } from '../scheduler.js'
@@ -131,6 +131,11 @@ router.post('/auctions/:id/chat', requireAuth, async (req, res) => {
     const { message } = req.body
     const auctionId = parseInt(req.params.id)
     if (!message || !message.trim()) return res.status(400).json({ error: 'Empty message' })
+
+    // only allow users who have placed a bid on this auction to chat
+    const eligible = await has_bid(auctionId, req.session.user.id)
+    if (!eligible) return res.status(403).json({ error: 'You must place a bid to chat' })
+
     await pushChatMessage(auctionId, req.session.user.username, message.trim())
     res.json({ ok: true })
 })
