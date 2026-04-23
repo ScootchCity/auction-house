@@ -20,12 +20,12 @@ async function get_auction_details(auction_item) {
 // will write a new auction to the postgres database
 // like other write functions, return is just a confirmation if the row was successfully written in db
 //TODO: figure out how to get account UUID or another identifying feature without compromising data security
-async function write_auction(seller, item, desc, endDate) {
+async function write_auction(seller, item, desc, endDate, image_url) {
     const result = await client.query(
-        `INSERT INTO auctions (seller, item_name, description, end_date, status)
-         VALUES ($1, $2, $3, $4, 'In-Progress')
+        `INSERT INTO auctions (seller, item_name, description, end_date, status, image_url)
+         VALUES ($1, $2, $3, $4, 'In-Progress', $5)
          RETURNING id, end_date`,
-        [seller, item, desc, endDate]
+        [seller, item, desc, endDate, image_url || null ]
     );
     if (!result.rowCount) return null
     const { id, end_date } = result.rows[0]

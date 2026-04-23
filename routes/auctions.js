@@ -2,10 +2,11 @@ import { Router } from 'express'
 import { get_auction, create_auction } from '../mongo/auction.js'
 import { getActiveAuctions, setAuction, getAuction, getTopBid, pushChatMessage, getChatMessages, deleteAuction } from '../redis/auction.js'
 import { submitBid } from '../kafka/producer.js'
-import { get_user_bids, has_bid } from '../postgres/bids.js'
+import { get_user_bids, has_bid, get_auction_bids } from '../postgres/bids.js'
 import { write_auction, finish_auction } from '../postgres/auctions.js'
 import { get_username_by_id } from '../postgres/users.js'
 import { scheduleExpiry } from '../scheduler.js'
+import redisClient from '../redis/client.js'
 
 const router = Router()
 
@@ -17,12 +18,12 @@ function requireAuth(req, res, next) {
 
 // Create auction form
 router.get('/auctions/create', requireAuth, (req, res) => {
-    res.render('create_auction', { user: req.session.user, error: null, values: { item: '', description: '', days: '', hours: '' } })
+    res.render('create_auction', { user: req.session.user, error: null, values: { item: '', description: '', days: '', hours: '', image_url: '' } })
 })
 
 // Create auction submission
 router.post('/auctions/create', requireAuth, async (req, res) => {
-    const { item, description, days, hours } = req.body
+    const { item, description, days, hours, image_url } = req.body
     const totalMinutes = (parseInt(days) || 0) * 24 * 60 + (parseInt(hours) || 0) * 60
     const endDate = new Date(Date.now() + totalMinutes * 60000)
 
@@ -35,12 +36,12 @@ router.post('/auctions/create', requireAuth, async (req, res) => {
         return res.render('create_auction', {
             user: req.session.user,
             error: errorMsg,
-            values: { item, description, days: days || '', hours: hours || '' }
+            values: { item, description, days: days || '', hours: hours || '', image_url: image_url || ''}
         })
     }
 
-    // Write to Postgres — returns the new auction id and end_date
-    const pgAuction = await write_auction(req.session.user.id, item, description || null, endDate)
+    // Write to Postgres — returns the new auction id and end_date and image
+    const pgAuction = await write_auction(req.session.user.id, item, description || null, endDate, image_url || null)
     if (!pgAuction) return res.redirect('/auctions/create?error=Failed+to+create+auction')
 
     // Write to Mongo
@@ -48,6 +49,7 @@ router.post('/auctions/create', requireAuth, async (req, res) => {
         sellerUUID: req.session.user.id,
         item,
         description: description || null,
+        image_url: image_url || null,
         endDate,
         auctionId: pgAuction.id,
     })
@@ -83,8 +85,9 @@ router.get('/auctions/:id', requireAuth, async (req, res) => {
     const top_bid = await getTopBid(auction.auction_id)
     const seller_username = await get_username_by_id(auction.seller_id) ?? 'Unknown'
     const messages = await getChatMessages(auction.auction_id)
+    const bid_history = await get_auction_bids(auction.auction_id)
 
-    res.render('auction', { auction: auction.toObject(), top_bid, seller_username, messages, user: req.session.user, error: req.query.error || null })
+    res.render('auction', { auction: auction.toObject(), top_bid, seller_username, messages, bid_history, user: req.session.user, error: req.query.error || null })
 })
 
 // User profile — current top bids and won auctions
@@ -157,4 +160,25 @@ router.post('/dev/close/:id', requireAuth, async (req, res) => {
     console.log(`[dev] manually closed auction ${id}`)
     res.redirect('/dev?closed=' + id)
 })
+// redis debug page — shows live cache state for auctions and chats
+router.get('/redis', requireAuth, async (req, res) => {
+    const auctionKeys = await redisClient.keys('auction:*')
+    const chatKeys = await redisClient.keys('chat:*')
+
+    const auctions = []
+    for (const key of auctionKeys) {
+        const data = await redisClient.hgetall(key)
+        const ttl = await redisClient.ttl(key)
+        auctions.push({ key, ...data, ttl })
+    }
+
+    const chats = []
+    for (const key of chatKeys) {
+        const count = await redisClient.llen(key)
+        chats.push({ key, count })
+    }
+
+    res.render('redis', { auctions, chats, user: req.session.user })
+})
+
 export default router

@@ -19,6 +19,7 @@ export async function create_auction(auctionInformation) {
         seller_id: auctionInformation.sellerUUID,
         item: auctionInformation.item,
         description: auctionInformation.description,
+        image_url: auctionInformation.image_url || null,
         start_date: new Date(),
         end_date: auctionInformation.endDate,
         active: true

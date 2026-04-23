@@ -20,6 +20,7 @@ await client.query(`
     seller UUID NOT NULL REFERENCES accounts(id),
     item_name VARCHAR(100) NOT NULL,
     description VARCHAR(1000),
+    image_url VARCHAR(500),
     start_date TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     end_date TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP + interval '4 days',
     status VARCHAR(20) CHECK (status IN ('In-Progress', 'Finished'))

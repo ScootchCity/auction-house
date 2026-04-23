@@ -57,6 +57,20 @@ async function has_bid(auction_id, account_id) {
   return result.rowCount > 0
 }
 
+// get full bid history for an auction, newest first
+async function get_auction_bids(auction_id) {
+  const result = await client.query(
+    `SELECT b.amount, b.created_at, a.username
+     FROM bids b
+     JOIN accounts a ON a.id = b.account_id
+     WHERE b.auction_id = $1
+     ORDER BY b.created_at DESC`,
+    [auction_id]
+  )
+  return result.rows
+}
+
+export { get_auction_bids }
 
 
 export { get_top_bid, set_top_bid, write_bid, write_starting_bid, get_user_bids, has_bid };

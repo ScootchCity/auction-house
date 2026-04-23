@@ -9,6 +9,7 @@ const auctions = new mongoose.Schema({
     seller_id: {type: String, required: true},
     item: {type: String, required: true},
     description: String,
+    image_url: String,
     start_date: {type: Date, default: Date.now},
     end_date: {type: Date, required: true},
     active: {type: Boolean, required: true}
