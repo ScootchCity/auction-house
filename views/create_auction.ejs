@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Auction — Auction House</title>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: 40px auto; padding: 0 1rem; }
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+        h1 { margin: 0; }
+        .logout { background: none; border: 1px solid #333; padding: .4rem .8rem; cursor: pointer; }
+        .back { display: inline-block; margin-bottom: 1.5rem; color: #555; text-decoration: none; }
+        .back:hover { text-decoration: underline; }
+        label { display: block; margin-bottom: .25rem; font-weight: bold; }
+        input, textarea { width: 100%; padding: .5rem; margin-bottom: 1rem; box-sizing: border-box; }
+        textarea { resize: vertical; height: 100px; font-family: inherit; font-size: inherit; }
+        button[type=submit] { padding: .5rem 1rem; background: #333; color: #fff; border: none; cursor: pointer; }
+        button[type=submit]:hover { background: #555; }
+        .error { color: red; margin-bottom: 1rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Auction House</h1>
+        <form method="POST" action="/logout">
+            <button class="logout" type="submit">Log out (<%= user.username %>)</button>
+        </form>
+    </header>
+
+    <a class="back" href="/auctions">&larr; Back to auctions</a>
+
+    <h2>Create Auction</h2>
+
+    <% if (error) { %><p class="error"><%= error %></p><% } %>
+
+    <form method="POST" action="/auctions/create">
+        <label for="item">Item Name</label>
+        <input type="text" id="item" name="item" maxlength="100" value="<%= values.item %>" required>
+
+        <label for="description">Description (optional)</label>
+        <textarea id="description" name="description" maxlength="1000"><%= values.description %></textarea>
+
+        <label for="duration">Duration</label>
+        <div style="display:flex; gap:.5rem;">
+            <input type="number" id="days" name="days" min="0" max="20" placeholder="Days" value="<%= values.days %>" style="flex:1;">
+            <input type="number" id="hours" name="hours" min="0" max="23" placeholder="Hours" value="<%= values.hours %>" style="flex:1;">
+        </div>
+        <small style="color:#888; display:block; margin-top:-.5rem; margin-bottom:1rem;">Minimum 1 hour, maximum 20 days</small>
+
+        <button type="submit">List Auction</button>
+    </form>
+</body>
+</html>

@@ -2,9 +2,11 @@ import { auctionsExport, bidsExport } from "./schema.js"
 //import { seed_database } from './items.js'
 
 async function get_active_auctions() {
-    const activeAuctions = (await auctionsExport.find({active: true }).sort({end_date: 1}.limit(10)))
+    const activeAuctions = await auctionsExport.find({ active: true }).sort({ end_date: 1 }).limit(10)
     return activeAuctions
 }
+
+export { get_active_auctions }
 
 export async function get_auction(auctionId) {
     const auction = (await auctionsExport.findOne({auction_id: auctionId}))
@@ -12,19 +14,13 @@ export async function get_auction(auctionId) {
 }
 
 export async function create_auction(auctionInformation) {
-    const lastAuction = await auctionsExport.findOne().sort({ auctionId: -1})
-    const nextId = lastAuction ? lastAuction.auction_id + 1 : 1
-
-    const startDate = new Date()
-    const endDate = new Date(startDate.getTime() + auctionInformation.durationMinutes * 60000)
-
     const auction = new auctionsExport({
-        auction_id: nextId,
-        seller_id: nextId, // Change to be users seller id
+        auction_id: auctionInformation.auctionId,
+        seller_id: auctionInformation.sellerUUID,
         item: auctionInformation.item,
         description: auctionInformation.description,
-        start_date: startDate,
-        end_date: endDate,
+        start_date: new Date(),
+        end_date: auctionInformation.endDate,
         active: true
     })
 

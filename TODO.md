@@ -4,9 +4,11 @@
 
 ## Web GUI
 
+- [x] Wire up auction creation via the web GUI — implemented at `GET/POST /auctions/create`.
 - [ ] Dev-only page (`/dev`) to manually force-close any active auction — useful for demoing expiry and win history without waiting for `end_date`.
-- [ ] Wire up auction creation via the web GUI — `write_auction()` exists in `postgres/auctions.js` but there's no web form yet. When added, call `scheduleExpiry()` from `scheduler.js` at creation time.
 - [ ] Show seller username on auction detail page — deferred until auction pages are migrated to Mongo as source of truth (`seller_id` is in Mongo but username lookup still needs a Postgres JOIN).
+- [ ] Add nav bar with profile link and styled buttons to all pages — currently only the auctions listing has the profile link.
+- [ ] Bell icon + outbid notifications — poll `/auctions/:id/top_bid` and compare `account_id` of top bidder to logged-in user; light up bell if outbid. (WebSocket push version lives in ah-networking.)
 
 ### Polling enhancements
 - [ ] `/auctions/:id/top_bid` endpoint should also return auction `status` — client JS can then hide the bid form and show "This auction has ended" when status comes back `'Finished'`, without needing a page reload.

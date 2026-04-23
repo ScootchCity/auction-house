@@ -18,10 +18,10 @@ async function setAuction(auction) {
     seller: auction.seller ?? '',
   })
 
-  //set a 4 day TTL on 'in-progress' auctions to MATCH WITH postgres default end_date interval
-  //finished auctions do not expire ... they stay in cache for reference
-  if (auction.status === 'In-Progress') {
-    await client.expire(key, 60 * 60 * 24 * 4)
+  // TTL matches actual end_date so the key doesn't outlive or prematurely drop the auction
+  if (auction.status === 'In-Progress' && auction.end_date) {
+    const ttlSeconds = Math.max(Math.floor((new Date(auction.end_date) - Date.now()) / 1000), 1)
+    await client.expire(key, ttlSeconds)
   }
 }
 

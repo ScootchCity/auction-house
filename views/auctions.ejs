@@ -20,6 +20,7 @@
     <header>
         <h1>Active Auctions</h1>
         <div style="display:flex; gap:.75rem; align-items:center;">
+            <a href="/auctions/create" style="color:#333; text-decoration:none; font-size:.95rem;">+ New Auction</a>
             <a href="/profile" style="color:#333; text-decoration:none; font-size:.95rem;"><%= user.username %></a>
             <form method="POST" action="/logout">
                 <button class="logout" type="submit">Log out</button>
@@ -36,7 +37,7 @@
                 <a href="/auctions/<%= a.id %>"><%= a.item_name %></a>
                 <div class="meta">
                     Top bid: $<%= a.top_bid.toFixed(2) %> &nbsp;|&nbsp;
-                    Ends: <%= new Date(a.end_date).toLocaleDateString() %>
+                    Ends: <%= new Date(a.end_date).toLocaleString() %>
                     <% if (a.description && a.description.length > 0) { %> &nbsp;|&nbsp; <%= a.description %><% } %>
                 </div>
             </li>
