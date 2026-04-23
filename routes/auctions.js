@@ -1,10 +1,10 @@
 import { Router } from 'express'
 import { get_auction, create_auction } from '../mongo/auction.js'
-import { getActiveAuctions, setAuction, getAuction } from '../redis/auction.js'
-import { getTopBid } from '../redis/auction.js'
+import { getActiveAuctions, setAuction, getAuction, getTopBid, pushChatMessage, getChatMessages, deleteAuction } from '../redis/auction.js'
 import { submitBid } from '../kafka/producer.js'
 import { get_user_bids } from '../postgres/bids.js'
-import { write_auction } from '../postgres/auctions.js'
+import { write_auction, finish_auction } from '../postgres/auctions.js'
+import { get_username_by_id } from '../postgres/users.js'
 import { scheduleExpiry } from '../scheduler.js'
 
 const router = Router()
@@ -81,7 +81,10 @@ router.get('/auctions/:id', requireAuth, async (req, res) => {
     if (!auction) return res.redirect('/auctions')
 
     const top_bid = await getTopBid(auction.auction_id)
-    res.render('auction', { auction: auction.toObject(), top_bid, user: req.session.user, error: req.query.error || null })
+    const seller_username = await get_username_by_id(auction.seller_id) ?? 'Unknown'
+    const messages = await getChatMessages(auction.auction_id)
+
+    res.render('auction', { auction: auction.toObject(), top_bid, seller_username, messages, user: req.session.user, error: req.query.error || null })
 })
 
 // User profile — current top bids and won auctions
@@ -121,4 +124,32 @@ router.post('/bid', requireAuth, async (req, res) => {
     res.redirect(`/auctions/${auction_id}?just_bid=1`)
 })
 
+//chat + dev routes
+// /auctions/:id/chat = POST saves message to REDIS = get returns all messages
+// for polling. /dev - list active auctions, /dev/close/:id force finish auction for demo
+router.post('/auctions/:id/chat', requireAuth, async (req, res) => {
+    const { message } = req.body
+    const auctionId = parseInt(req.params.id)
+    if (!message || !message.trim()) return res.status(400).json({ error: 'Empty message' })
+    await pushChatMessage(auctionId, req.session.user.username, message.trim())
+    res.json({ ok: true })
+})
+
+router.get('/auctions/:id/chat', requireAuth, async (req, res) => {
+    const messages = await getChatMessages(parseInt(req.params.id))
+    res.json({ messages })
+})
+
+router.get('/dev', requireAuth, async (req, res) => {
+    const auctions = await getActiveAuctions()
+    res.render('dev', { auctions, user: req.session.user, closed: req.query.closed || null })
+})
+
+router.post('/dev/close/:id', requireAuth, async (req, res) => {
+    const id = parseInt(req.params.id)
+    await finish_auction(id)
+    await deleteAuction(id)
+    console.log(`[dev] manually closed auction ${id}`)
+    res.redirect('/dev?closed=' + id)
+})
 export default router

@@ -1,5 +1,4 @@
 import client from './client.js'
-
 //all auction data is stored in Redis as Hash under the key: 'auction:{id}'
 //fields: item_name, description, status, end_date, top_bid, seller
 
@@ -81,6 +80,24 @@ async function getActiveAuctions() {
 //so after auction status changes to finished in postgres
 async function deleteAuction(id) {
   await client.del(`auction:${id}`)
+}
+//FOR THE CHAT
+//messages are stored as a Redis list under chat:{auction_id}
+//each entry is JSON: { username, message, ts }
+//capped = 50 messages just gets trimmed automatically
+const CHAT_CAP = 50
+
+export async function pushChatMessage(auctionId, username, message) {
+  const key = `chat:${auctionId}`
+  const entry = JSON.stringify({ username, message, ts: Date.now() })
+  await client.rpush(key, entry)
+  await client.ltrim(key, -CHAT_CAP, -1)
+}
+
+export async function getChatMessages(auctionId) {
+  const key = `chat:${auctionId}`
+  const raw = await client.lrange(key, 0, -1)
+  return raw.map(r => JSON.parse(r))
 }
 
 //export all functions so they can be used

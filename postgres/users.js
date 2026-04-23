@@ -57,8 +57,20 @@ async function get_UUID(email){
 //let id = await get_UUID("calvin.dibartolo@mymail.champlain.edu");
 //console.log(id);
 
+// loop up username by UUID - used to show seller name on auction detail page
+async function get_username_by_id(id) {
+  // seller_id might be an integer from old seed data, not a real UUID — skip the lookup if so
+  if (!id || !id.includes('-')) return null
+  const result = await client.query(
+    'SELECT username FROM accounts WHERE id = $1',
+    [id]
+  )
+  return result.rows[0]?.username ?? null
+}
+
 //put functions here so they can be used when the postgres index is imported
 export {verify_login}
 export {verify_unique_email}
 export {write_login}
 export {get_UUID}
+export {get_username_by_id}

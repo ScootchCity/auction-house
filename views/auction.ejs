@@ -27,39 +27,85 @@
             <button class="logout" type="submit">Log out (<%= user.username %>)</button>
         </form>
     </header>
-
     <a class="back" href="/auctions">&larr; Back to auctions</a>
-
     <div class="detail">
         <h2><%= auction.item %></h2>
         <% if (auction.description) { %><p><%= auction.description %></p><% } %>
+        <p style="color:#666; font-size:.9rem;">Listed by <strong><%= seller_username %></strong></p>
         <p>Ends: <%= auction.end_date ? new Date(auction.end_date).toLocaleDateString() : 'Unknown' %></p>
     </div>
-
     <p class="top-bid">Current top bid: $<%= top_bid.toFixed(2) %></p>
-
     <% if (error) { %><p class="error"><%= error %></p><% } %>
-
     <form class="bid-form" method="POST" action="/bid" data-auction-id="<%= auction.auction_id %>">
         <input type="hidden" name="auction_id" value="<%= auction.auction_id %>">
         <input type="number" name="amount" step="0.01" min="0.01" placeholder="Your bid ($)" required>
         <button type="submit">Place Bid</button>
     </form>
+
+    <div class="chat" style="margin-top:2rem; border-top:1px solid #ddd; padding-top:1rem;">
+        <h3 style="margin:0 0 .75rem; font-size:1rem;">Bidder Chat</h3>
+        <div id="chat-log" style="height:200px; overflow-y:auto; border:1px solid #ddd; border-radius:4px; padding:.5rem; margin-bottom:.5rem; background:#fafafa; font-size:.9rem;"></div>
+        <div style="display:flex; gap:.5rem;">
+            <input id="chat-msg" type="text" placeholder="Say something..." maxlength="200" autocomplete="off" style="flex:1; padding:.5rem;">
+            <button id="chat-send" style="padding:.5rem .8rem; background:#333; color:#fff; border:none; cursor:pointer;">Send</button>
+        </div>
+    </div>
+
     <script>
         const auctionId = document.querySelector('.bid-form').dataset.auctionId
         const justBid = new URLSearchParams(window.location.search).get('just_bid') === '1'
-
         async function pollTopBid() {
             const res = await fetch('/auctions/' + auctionId + '/top_bid')
             const { top_bid } = await res.json()
             document.querySelector('.top-bid').textContent = 'Current top bid: $' + top_bid.toFixed(2)
         }
-
         // poll every 5 seconds
         setInterval(pollTopBid, 5000)
-
         // if the user just placed a bid, fire an extra poll after 800ms for Kafka to settle
         if (justBid) setTimeout(pollTopBid, 800)
+
+        // chat — polls every 3s, only appends messages we haven't rendered yet
+        const chatLog = document.getElementById('chat-log')
+        let lastCount = 0
+
+        function scrollBottom() { chatLog.scrollTop = chatLog.scrollHeight }
+
+        function appendMessage(m) {
+            const div = document.createElement('div')
+            div.style.marginBottom = '.4rem'
+            div.innerHTML = `<strong>${m.username}:</strong> ${m.message} <span style="color:#aaa;font-size:.75rem;margin-left:.3rem;">${new Date(m.ts).toLocaleTimeString()}</span>`
+            chatLog.appendChild(div)
+        }
+
+        async function pollChat() {
+            const res = await fetch('/auctions/' + auctionId + '/chat')
+            const { messages } = await res.json()
+            if (messages.length > lastCount) {
+                messages.slice(lastCount).forEach(appendMessage)
+                lastCount = messages.length
+                scrollBottom()
+            }
+        }
+
+        setInterval(pollChat, 3000)
+        pollChat()
+
+        document.getElementById('chat-send').addEventListener('click', async () => {
+            const input = document.getElementById('chat-msg')
+            const message = input.value.trim()
+            if (!message) return
+            input.value = ''
+            await fetch('/auctions/' + auctionId + '/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message })
+            })
+            await pollChat()
+        })
+
+        document.getElementById('chat-msg').addEventListener('keydown', e => {
+            if (e.key === 'Enter') document.getElementById('chat-send').click()
+        })
     </script>
 </body>
 </html>
