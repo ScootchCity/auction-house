@@ -29,6 +29,9 @@
     </header>
     <a class="back" href="/auctions">&larr; Back to auctions</a>
     <div class="detail">
+        <% if (auction.image_url) { %>
+        <img src="<%= auction.image_url %>" alt="<%= auction.item %>" style="width:100%; max-height:300px; object-fit:cover; border-radius:4px; margin-bottom:1rem;">
+        <% } %>
         <h2><%= auction.item %></h2>
         <% if (auction.description) { %><p><%= auction.description %></p><% } %>
         <p style="color:#666; font-size:.9rem;">Listed by <strong><%= seller_username %></strong></p>
@@ -41,7 +44,21 @@
         <input type="number" name="amount" step="0.01" min="0.01" placeholder="Your bid ($)" required>
         <button type="submit">Place Bid</button>
     </form>
-
+        <div style="margin-top:2rem; border-top:1px solid #ddd; padding-top:1rem;">
+            <h3 style="margin:0 0 .75rem; font-size:1rem;">Bid History</h3>
+            <div id="bid-history">
+                <% if (bid_history.length === 0) { %>
+            <p style="color:#999; font-size:.9rem;">No bids yet.</p>
+        <% } else { %>
+            <% bid_history.forEach(b => { %>
+                <div style="display:flex; justify-content:space-between; font-size:.9rem; padding:.4rem 0; border-bottom:1px solid #f0f0f0;">
+            <span><strong><%= b.username %></strong> bid $<%= parseFloat(b.amount).toFixed(2) %></span>
+        <span style="color:#aaa;"><%= new Date(b.created_at).toLocaleString() %></span>
+    </div>
+<% }) %>
+<% } %>
+    </div>
+</div>
     <div class="chat" style="margin-top:2rem; border-top:1px solid #ddd; padding-top:1rem;">
         <h3 style="margin:0 0 .75rem; font-size:1rem;">Bidder Chat</h3>
         <div id="chat-log" style="height:200px; overflow-y:auto; border:1px solid #ddd; border-radius:4px; padding:.5rem; margin-bottom:.5rem; background:#fafafa; font-size:.9rem;"></div>

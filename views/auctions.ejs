@@ -16,10 +16,13 @@
         .empty { color: #999; }
     </style>
 </head>
+
 <body>
     <header>
         <h1>Active Auctions</h1>
         <div style="display:flex; gap:.75rem; align-items:center;">
+            <a href="/redis" style="color:#333; text-decoration:none; font-size:.85rem; border:1px solid #333; padding:.3rem .6rem; border-radius:3px;">Redis</a>
+            <span id="dev-trigger" style="color:#ddd; cursor:default; font-size:.85rem; user-select:none;">•</span>
             <a href="/auctions/create" style="color:#333; text-decoration:none; font-size:.95rem;">+ New Auction</a>
             <a href="/profile" style="color:#333; text-decoration:none; font-size:.95rem;"><%= user.username %></a>
             <form method="POST" action="/logout">
@@ -44,5 +47,13 @@
             <% }) %>
         </ul>
     <% } %>
+        //secret dev
+    <script>
+        let devClicks = 0
+        document.getElementById('dev-trigger').addEventListener('click', () => {
+            devClicks++
+            if (devClicks >= 5) window.location.href = '/dev'
+        })
+    </script>
 </body>
 </html>

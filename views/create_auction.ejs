@@ -45,7 +45,8 @@
             <input type="number" id="hours" name="hours" min="0" max="23" placeholder="Hours" value="<%= values.hours %>" style="flex:1;">
         </div>
         <small style="color:#888; display:block; margin-top:-.5rem; margin-bottom:1rem;">Minimum 1 hour, maximum 20 days</small>
-
+        <label for="image_url">Image URL (optional)</label>
+        <input type="url" id="image_url" name="image_url" placeholder="https://..." value="<%= values.image_url %>">
         <button type="submit">List Auction</button>
     </form>
 </body>
